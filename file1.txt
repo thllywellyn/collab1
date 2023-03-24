@@ -1,1 +1,405 @@
-lol
+import mysql.connector
+import random
+import datetime
+import time
+import getpass
+
+#date and time
+origi = str(datetime.datetime.now())
+st = origi[0:11]
+
+#connect to SQL server
+mydb = mysql.connector.connect(host='remotemysql.com',
+                               user='cQgRqg1UgV',
+                               password='jj0l3fNpmZ')
+
+#cursor announce
+SQLc = mydb.cursor(buffered=True)
+
+#databse creation
+SQLc.execute("create database if not\
+                  exists cQgRqg1UgV")
+#Selected Database
+SQLc.execute("use cQgRqg1UgV")
+#Login Table
+SQLc.execute("create table if not exists login\
+                (name varchar(100),\
+                username varchar(100) primary key,\
+                password varchar(100),\
+                phone_number char(10),\
+                address varchar(225),\
+                age int)")
+#Destination Table
+SQLc.execute("create table if not exists\
+                Destinations\
+                (Sl_No int,\
+                Destination varchar(100) primary key,\
+                Price int,\
+                Seats_AVL int)")
+#Destination table data input
+SQLc.execute("select * from Destinations")
+res = SQLc.fetchone()
+if res is None:
+  SQLc.execute("insert into Destinations values\
+                    (1,'B1',525,20),\
+                    (2,'B2',600,20),\
+                    (3,'B3',860,20),\
+                    (4,'B4',425,20),\
+                    (5,'B5',612,20),\
+                    (6,'B6',523,20),\
+                    (7,'B7',425,20),\
+                    (8,'B8',612,20),\
+                    (9,'B9',523,20),\
+                    (10,'B10',415,20),\
+                    (11,'B11',312,20),\
+                    (12,'B12',413,20),\
+                    (13,'B13',431,20),\
+                    (14,'B14',432,20),\
+                    (15,'B15',900,20),\
+                    (16,'B16',312,20),\
+                    (17,'B17',413,20),\
+                    (18,'B18',210,20),\
+                    (19,'B19',432,20)")
+#
+
+
+#header
+def header():
+  print()
+  print("<--------------- © 2022 © --------------->")
+  print("<----------- WELCOME TO PUBLIC BUS RESERVATION PORTAL ------------>")
+  print()
+
+
+#start up menu
+def start():
+  header()
+  print('1.Signup')
+  print('2.Login')
+  op = int(input("Option : "))
+  print()
+  if op == 1:
+    signup()
+
+  elif op == 2:
+    login()
+
+
+#signup
+def signup():
+  print('Sign-Up for Account')
+  print()
+  name = input("Name :")
+  while True:
+    username = input('Create a Username :')
+    SQLc.execute("select username from\
+                        login where username='" + username + "'")
+    ch = SQLc.fetchone()
+    if ch is None:
+      while True:
+        password1 = getpass.getpass('Enter password : ')
+        password2 = getpass.getpass('Confirm Password : ')
+        if password1 != password2:
+          print("Password doesnt match")
+        else:
+          break
+      pn = input("Phone number : ")
+      address = input('Address : ')
+      age = (input('Age : '))
+      SQLc.execute("Insert into login values('" + name + "',\
+                                                       '" + username + "',\
+                                                       '" + password2 + "',\
+                                                       '" + pn + "',\
+                                                       '" + address + "',\
+                                                       '" + age + "')")
+      mydb.commit()
+      print("Account created")
+      print()
+      print()
+      SQLc.execute("create table if not exists\
+                            " + username + "\
+                            (id int primary key,\
+                            number_of_seats int,\
+                            starting_point varchar(100),\
+                            end_point varchar(100),\
+                            b_date varchar(100),\
+                            j_date varchar(100),\
+                            credit_no varchar(100),\
+                            bus_time varchar(100),\
+                            seat_no varchar(100))")
+      login()
+      break
+    else:
+      print('User name already exists, please login instead')
+      start()
+
+
+#login
+def login():
+  print('<-----  Login  ----->')
+  print()
+  username = input('Username : ')
+  SQLc.execute("select Username from login where Username='" + username + "'")
+  ch = SQLc.fetchone()
+
+  SQLc.execute("create table if not exists " + username +
+               "(id int primary key,\
+                number_of_seats int,starting_point varchar(100),end_point varchar(100),\
+                b_date varchar(100),j_date varchar(100),credit_no varchar(100),\
+                bus_time varchar(100),seat_no varchar(100))")
+  if ch is not None:
+    while True:
+      password = getpass.getpass('Password : ')
+      SQLc.execute("select password from login where password='" + password +
+                   "'")
+      ch = SQLc.fetchone()
+      if ch is not None:
+        SQLc.execute("select name from login where username='" + username +
+                     "'")
+        usr = SQLc.fetchone()
+        global nm
+        nm = usr[0]
+        main()
+        break
+      else:
+        print("Incorrect Password")
+  else:
+    print("Your account doesnt exist please signup  \n")
+    start()
+
+
+#booking tickets
+def book():
+  header()
+  print('<-----  Booking  ----->')
+  SQLc.execute("select * from Destinations")
+  l1 = []
+  print("Buses available 24/7")
+  for j in range(1, 10):
+    n = SQLc.fetchone()
+    print(j, ' .', n[1], ' - ', n[2])
+    l1 += [n[0]]
+
+  for j in range(10, 20):
+    n = SQLc.fetchone()
+    print(j, '.', n[1], ' - ', n[2])
+    l1 += [n[0]]
+  print()
+  print()
+  username = input("Confirm Username : ")
+  print()
+  start = int(input("From : "))
+  end = int(input("To : "))
+  print()
+  number = int(input("Number of tickets : "))
+  number2 = str(number)
+  print()
+  index = str(l1.index(end))
+  print()
+  while True:
+    date = input("Date of journey (YYYY-MM-DD) : ")
+    print()
+    if date >= st:
+      break
+    else:
+      print("Invalid date")
+  time2 = input("enter required time (hhmm) (24 h) : ")
+  mm = time2[3:]
+  hh = time2[0:2]
+  mmn = int(mm) + 30
+  mmn_ = int(mm) - 30
+  hhn = int(hh) + 1
+  if int(mmn) > 60:
+    time2 = str(hhn) + ':' + str(mmn_)
+  elif int(mmn) == 60:
+    time2 = str(hhn) + ':00'
+  else:
+    time2 = str(hh) + ':' + str(mmn)
+  print("The bus is available at ", time2)
+  gen = str(random.randint(10000, 900000))
+  genh = 'r' + gen
+
+  SQLc.execute("select Seats_AVL from Destinations where Sl_No=" + index + "")
+  sa = SQLc.fetchone()
+  san = str(int(sa[0]) - number)
+  print('seats left:', san)
+  date_t = str(datetime.datetime.now())
+
+  SQLc.execute("select Price from Destinations where Sl_No='" + index + "'")
+  n = SQLc.fetchone()
+  price = int(n[0])
+  print("total amount : ", (number) * (price))
+  print()
+
+  SQLc.execute("create table if not exists " + genh +
+               " (name varchar(100) primary key,age int)")
+  inp = input("Should we proceed?(Y/N) : ")
+  seat_ = []
+  if (inp == "Y" or inp == 'y'):
+    for i in range(1, number + 1):
+      name = input("Passanger name  : ")
+      age = input("Passanger age : ")
+      a_seat = int(sa[0]) - i
+      seat_ = seat_ + [a_seat]
+      SQLc.execute("insert into " + genh + " values ('" + name + "','" + age +
+                   "')")
+      print()
+    print("Please make payment")
+    card_no = input("Enter your card number: ")
+    pin = getpass.getpass('Enter PIN: ')
+    print('Card PIN is not stored on our databases')
+    time.sleep(2)
+    print("........Processing.........")
+    time.sleep(2)
+    print("........ Almost There .........")
+    time.sleep(2)
+    print("<----------Transaction successful------------>")
+    print()
+    print("For further queries contact : 429 ")
+    print()
+  print(number, "tickets booked")
+  print("your seat numbers are : ", end="")
+  seat_no = str(seat_[0])
+  for i in range(1, len(seat_)):
+    seat_no = seat_no + "," + str(seat_[i])
+  for i in range(len(seat_)):
+    print(seat_[i], ",", end='')
+  print('')
+  print('your ticket id is:', gen)
+  print("\n\n")
+  start_point = str(start)
+  end_point = str(end)
+  SQLc.execute("update Destinations set Seats_AVL=" + san + " where Sl_No=" +
+               index + "")
+  SQLc.execute("insert into " + username + " values ('" + gen + "','" +
+               number2 + "','" + start_point + "','" + end_point + "','" +
+               date_t + "','" + date + "','" + card_no + "','" + time2 +
+               "','" + seat_no + "')")
+  mydb.commit()
+  main()
+
+
+#canceling tickets
+def cancel():
+  print('Cancellation')
+  username = input("Confirm Username : ")
+  id1 = input('enter your ticket id number : ')
+  password = getpass.getpass('Password : ')
+
+  SQLc.execute("select password from login where password='" + password + "'")
+  ch = SQLc.fetchone()
+
+  SQLc.execute("select number_of_seats from " + username + " where id=" + id1 +
+               "")
+  num = SQLc.fetchone()
+  number = int(num[0])
+
+  SQLc.execute("select end_point from " + username + " where id=" + id1 + "")
+  end_point = SQLc.fetchone()
+  end = end_point[0]
+  end = int(end)
+
+  SQLc.execute("select * from Destinations")
+  l1 = []
+  for j in range(1, 20):
+    n = SQLc.fetchone()
+    l1 = l1 + [n[0]]
+  index = str(l1.index(end))
+
+  SQLc.execute("select Seats_AVL from Destinations where Sl_No=" + index + "")
+  sa = SQLc.fetchone()
+  san = str(int(sa[0]) + number)
+
+  SQLc.execute("update Destinations set Seats_AVL=" + san + " where Sl_No=" +
+               index + "")
+
+  if ch is not None:
+    SQLc.execute("delete from " + username + " where id=" + id1 + "")
+    mydb.commit()
+    print()
+    print("Ticket cancelled")
+    print("Money will be refunded within 48 hours")
+  print("\n\n")
+  main()
+
+
+#viewing history
+def history():
+  header()
+  print('Booking History')
+  print()
+  username = input("Enter Username : ")
+  print()
+  SQLc.execute("select * from " + username + "")
+  a = SQLc.fetchall()
+  if a == []:
+    print("NO BOOKINGS YET")
+  for n in range(len(a)):
+    print()
+    print('Ticket id:', a[n][0])
+    print('Number of tickets:', a[n][1])
+    print('From:', a[n][2])
+    print('To:', a[n][3])
+    print("Ticket booked on : ", a[n][4])
+    print('Date of journey:', a[n][5])
+
+  print("\n\n")
+
+  main()
+  print()
+
+
+#EXIT SEQ
+def exit():
+  header()
+  print('LOGGING OUT')
+  time.sleep(1)
+  print('.')
+  time.sleep(1)
+  print('.')
+  time.sleep(1)
+  print('LOGGED OUT')
+  time.sleep(2)
+  print('Thank you for using the Online Bus Ticketing System')
+  time.sleep(0.5)
+
+
+#Main menu
+def main():
+  header()
+  print()
+  print('Welcome back !')
+  print(nm)
+  print('1.Book Tickets')
+  print('2.Cancel')
+  print('3.View History')
+  print('4.Exit')
+  choice = int(input("Enter your choice: "))
+  if choice == 1:
+    book()
+  elif choice == 2:
+    cancel()
+  elif choice == 3:
+    history()
+  elif choice == 4:
+    exit()
+
+
+def beta():
+  print()
+  print('code is in beta!')
+  print()
+
+
+def seq1():
+  print('You need Active Internet Connection, server is hosted online!')
+  time.sleep(1)
+  print('.')
+  time.sleep(1)
+  print('.')
+  time.sleep(1)
+  start()
+
+
+beta()
+seq1()
